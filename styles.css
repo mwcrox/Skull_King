@@ -3,12 +3,19 @@ body {
     padding: 20px;
     max-width: 1000px;
     margin: auto;
-    background-color: #f9f9f9;
+    background-image: url('Pirateship.png');
+    background-size: cover;
+    /* Makes sure the image covers the whole area */
+    background-position: center;
+    /* Centers the image */
+    background-repeat: no-repeat;
+    /* Prevents the image from repeating */
 }
 
 header {
     text-align: center;
     margin-bottom: 30px;
+    color: white
 }
 
 h1 {
@@ -43,6 +50,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     text-align: center;
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .small-cell input {
@@ -65,6 +73,8 @@ td {
 #leaderboard {
     margin-top: 20px;
     text-align: left;
+    display: none;
+    color: white
 }
 
 #leaderboard ol {

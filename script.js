@@ -8,6 +8,7 @@ document.getElementById('mode-odd').addEventListener('click', () => startGame('o
 function startGame(mode) {
     document.getElementById('player-setup').style.display = 'none';
     document.getElementById('mode-select').style.display = 'none';
+    document.getElementById('leaderboard').style.display = 'block';
     generateScorecard(mode);
 }
 
@@ -172,6 +173,8 @@ function cancelReset() {
 function resetToHome() {
     document.getElementById('player-setup').style.display = 'grid';
     document.getElementById('mode-select').style.display = 'block';
+    document.getElementById('leaderboard').style.display = 'none';
+
     scorecardDiv.innerHTML = '';
     document.getElementById('leaderboard-list').innerHTML = '';
     resetFill.style.width = '0%';
