@@ -116,3 +116,16 @@ td {
     position: relative;
     z-index: 1;
 }
+
+@media (max-width: 600px) {
+    body {
+        background-image: url('Pirateship.png');
+        /* Optional: use a smaller or different image */
+        background-size: contain;
+        /* Or 'cover' depending on your preference */
+        background-position: top center;
+        /* Adjust position */
+        background-attachment: scroll;
+        /* Fix mobile issues with fixed backgrounds */
+    }
+}
