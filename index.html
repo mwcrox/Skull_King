@@ -13,7 +13,7 @@
         <h1>Skull King Scorecard</h1>
     </header>
 
-    <section class="player-inputs">
+    <section id="player-setup" class="player-inputs">
         <input type="text" placeholder="Player 1" class="player-name" />
         <input type="text" placeholder="Player 2" class="player-name" />
         <input type="text" placeholder="Player 3" class="player-name" />
@@ -24,15 +24,25 @@
         <input type="text" placeholder="Player 8" class="player-name" />
     </section>
 
-    <section class="game-modes">
+    <section id="mode-select" class="game-modes">
         <button id="mode-traditional">Traditional (1–10)</button>
         <button id="mode-even">Even Rounds (2–10)</button>
         <button id="mode-odd">Odd Rounds (1–9)</button>
     </section>
 
-    <section id="scorecard">
-        <!-- Score table will be generated here -->
+    <section id="scorecard"></section>
+
+    <section id="leaderboard">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard-list"></ol>
     </section>
+
+    <div id="reset-container">
+        <button id="reset-btn">
+            <div id="reset-fill"></div>
+            Hold to Reset
+        </button>
+    </div>
 
     <script src="script.js"></script>
 </body>

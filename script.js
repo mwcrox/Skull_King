@@ -1,9 +1,15 @@
 const playerInputs = document.querySelectorAll('.player-name');
 const scorecardDiv = document.getElementById('scorecard');
 
-document.getElementById('mode-traditional').addEventListener('click', () => generateScorecard('traditional'));
-document.getElementById('mode-even').addEventListener('click', () => generateScorecard('even'));
-document.getElementById('mode-odd').addEventListener('click', () => generateScorecard('odd'));
+document.getElementById('mode-traditional').addEventListener('click', () => startGame('traditional'));
+document.getElementById('mode-even').addEventListener('click', () => startGame('even'));
+document.getElementById('mode-odd').addEventListener('click', () => startGame('odd'));
+
+function startGame(mode) {
+    document.getElementById('player-setup').style.display = 'none';
+    document.getElementById('mode-select').style.display = 'none';
+    generateScorecard(mode);
+}
 
 function getPlayerNames() {
     return Array.from(playerInputs)
@@ -20,21 +26,16 @@ function getRounds(mode) {
 
 function generateScorecard(mode) {
     const players = getPlayerNames();
-    if (players.length < 2) {
-        alert("Please enter at least 2 player names.");
-        return;
-    }
-
     const rounds = getRounds(mode);
-    let html = `<table><thead><tr><th>Round</th>`;
+    let html = `<table class="small-cell"><thead><tr><th>Round</th>`;
 
     for (let player of players) {
-        html += `<th colspan="3">${player}</th>`;
+        html += `<th colspan="4">${player}</th>`;
     }
 
     html += `</tr><tr><th></th>`;
     for (let i = 0; i < players.length; i++) {
-        html += `<th>Bid</th><th>Wins</th><th>Score</th>`;
+        html += `<th>Bid</th><th>Wins</th><th>Bonus</th><th>Score</th>`;
     }
 
     html += `</tr></thead><tbody>`;
@@ -43,61 +44,136 @@ function generateScorecard(mode) {
         html += `<tr data-round="${round}"><td>${round}</td>`;
         for (let i = 0; i < players.length; i++) {
             html += `
-        <td><input type="number" min="0" class="bid-input" data-player="${i}" data-round="${round}" /></td>
-        <td><input type="number" min="0" class="wins-input" data-player="${i}" data-round="${round}" /></td>
+        <td><input type="number" inputmode="numeric" class="bid-input" data-player="${i}" data-round="${round}" /></td>
+        <td><input type="number" inputmode="numeric" class="wins-input" data-player="${i}" data-round="${round}" /></td>
+        <td><input type="number" inputmode="numeric" class="bonus-input" data-player="${i}" data-round="${round}" /></td>
         <td class="score-cell" data-player="${i}" data-round="${round}">0</td>`;
         }
         html += `</tr>`;
     }
 
-    // Total row
     html += `<tr id="total-row"><td><strong>Total</strong></td>`;
     for (let i = 0; i < players.length; i++) {
-        html += `<td colspan="3" class="player-total" data-player="${i}"><strong>0</strong></td>`;
+        html += `<td colspan="4" class="player-total" data-player="${i}"><strong>0</strong></td>`;
     }
     html += `</tr></tbody></table>`;
 
-    html += `<div style="text-align: center; margin-top: 20px;">
-    <button id="calculate-scores">Calculate Scores</button>
-  </div>`;
-
     scorecardDiv.innerHTML = html;
 
-    document.getElementById('calculate-scores').addEventListener('click', calculateScores);
+    attachLiveListeners();
+    updateLeaderboard();
 }
 
-function calculateScores() {
-    const scoreCells = scorecardDiv.querySelectorAll('.score-cell');
-    const totals = {};
+function attachLiveListeners() {
+    const inputs = scorecardDiv.querySelectorAll('.bid-input, .wins-input, .bonus-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            const round = parseInt(input.dataset.round, 10);
+            const player = parseInt(input.dataset.player, 10);
+            calculatePlayerRoundScore(player, round);
+            updatePlayerTotal(player);
+            updateLeaderboard();
+        });
+    });
+}
 
-    scoreCells.forEach(cell => {
-        const player = parseInt(cell.dataset.player);
-        const round = parseInt(cell.dataset.round);
+function calculatePlayerRoundScore(player, round) {
+    const bidStr = getInputValue(`.bid-input`, player, round);
+    const winsStr = getInputValue(`.wins-input`, player, round);
+    const bonus = parseInt(getInputValue(`.bonus-input`, player, round)) || 0;
 
-        const bidInput = scorecardDiv.querySelector(`.bid-input[data-player="${player}"][data-round="${round}"]`);
-        const winsInput = scorecardDiv.querySelector(`.wins-input[data-player="${player}"][data-round="${round}"]`);
+    const bid = parseInt(bidStr);
+    const wins = parseInt(winsStr);
+    const scoreCell = document.querySelector(`.score-cell[data-player="${player}"][data-round="${round}"]`);
 
-        const bid = parseInt(bidInput.value, 10);
-        const wins = parseInt(winsInput.value, 10);
+    // If bid or wins missing → do not calculate
+    if (bidStr === '' || winsStr === '' || isNaN(bid) || isNaN(wins)) {
+        scoreCell.textContent = 0;
+        return;
+    }
 
-        let score = 0;
+    let score = 0;
+    if (bid === wins) {
+        score = bid === 0 ? 10 * round : 20 * bid;
+    } else {
+        score = bid === 0 ? -10 * round : -10 * Math.abs(bid - wins);
+    }
 
-        if (!isNaN(bid) && !isNaN(wins)) {
-            if (bid === wins) {
-                score = bid === 0 ? 10 * round : 20 * bid;
-            } else {
-                score = bid === 0 ? -10 * round : -10 * Math.abs(bid - wins);
-            }
-        }
+    score += bonus;
+    scoreCell.textContent = score;
+}
 
-        cell.textContent = score;
-        if (!totals[player]) totals[player] = 0;
-        totals[player] += score;
+
+function getInputValue(selector, player, round) {
+    const input = document.querySelector(`${selector}[data-player="${player}"][data-round="${round}"]`);
+    return input?.value || "0";
+}
+
+function updatePlayerTotal(player) {
+    const scores = scorecardDiv.querySelectorAll(`.score-cell[data-player="${player}"]`);
+    let total = 0;
+    scores.forEach(cell => {
+        const val = parseInt(cell.textContent, 10);
+        if (!isNaN(val)) total += val;
+    });
+    document.querySelector(`.player-total[data-player="${player}"]`).innerHTML = `<strong>${total}</strong>`;
+}
+
+function updateLeaderboard() {
+    const players = getPlayerNames();
+    const scores = players.map((name, i) => {
+        const score = parseInt(document.querySelector(`.player-total[data-player="${i}"]`)?.textContent, 10) || 0;
+        return { name, score };
     });
 
-    const totalCells = scorecardDiv.querySelectorAll('.player-total');
-    totalCells.forEach(cell => {
-        const player = cell.dataset.player;
-        cell.innerHTML = `<strong>${totals[player] || 0}</strong>`;
+    scores.sort((a, b) => b.score - a.score);
+
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = '';
+    scores.forEach((p, i) => {
+        const li = document.createElement('li');
+
+        const rank = document.createElement('span');
+        rank.className = 'leader-rank';
+        rank.textContent = `${i + 1}.`;
+
+        const info = document.createElement('span');
+        info.className = 'leader-info';
+        info.textContent = `${p.name} — ${p.score}`;
+
+        li.appendChild(rank);
+        li.appendChild(info);
+        list.appendChild(li);
     });
+}
+
+
+
+// Hold to Reset
+let holdTimer;
+const resetBtn = document.getElementById('reset-btn');
+const resetFill = document.getElementById('reset-fill');
+
+resetBtn.addEventListener('mousedown', () => {
+    resetFill.style.transition = 'width 3s linear';
+    resetFill.style.width = '100%';
+    holdTimer = setTimeout(resetToHome, 3000);
+});
+
+resetBtn.addEventListener('mouseup', cancelReset);
+resetBtn.addEventListener('mouseleave', cancelReset);
+
+function cancelReset() {
+    clearTimeout(holdTimer);
+    resetFill.style.transition = 'width 0.3s ease';
+    resetFill.style.width = '0%';
+}
+
+function resetToHome() {
+    document.getElementById('player-setup').style.display = 'grid';
+    document.getElementById('mode-select').style.display = 'block';
+    scorecardDiv.innerHTML = '';
+    document.getElementById('leaderboard-list').innerHTML = '';
+    resetFill.style.width = '0%';
+    playerInputs.forEach(input => input.value = '');
 }

@@ -45,12 +45,64 @@ table {
     text-align: center;
 }
 
+.small-cell input {
+    width: 40px;
+    font-size: 0.75rem;
+    padding: 2px;
+}
+
+.small-cell td,
+.small-cell th {
+    font-size: 0.75rem;
+    padding: 4px;
+}
+
 th,
 td {
     border: 1px solid #ccc;
-    padding: 8px;
 }
 
-th {
-    background-color: #f0f0f0;
+#leaderboard {
+    margin-top: 20px;
+    text-align: left;
+}
+
+#leaderboard ol {
+    list-style: none;
+    padding: 0;
+    font-size: 1rem;
+}
+
+#reset-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#reset-btn {
+    position: relative;
+    overflow: hidden;
+    background: #ccc;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+#reset-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: blue;
+    opacity: 0.6;
+    transition: width 0s;
+    z-index: 0;
+}
+
+#reset-btn span,
+#reset-btn {
+    position: relative;
+    z-index: 1;
 }
