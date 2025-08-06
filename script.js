@@ -155,14 +155,22 @@ let holdTimer;
 const resetBtn = document.getElementById('reset-btn');
 const resetFill = document.getElementById('reset-fill');
 
-resetBtn.addEventListener('mousedown', () => {
+// Mouse events
+resetBtn.addEventListener('mousedown', startHold);
+resetBtn.addEventListener('mouseup', cancelReset);
+resetBtn.addEventListener('mouseleave', cancelReset);
+
+// Touch events
+resetBtn.addEventListener('touchstart', startHold);
+resetBtn.addEventListener('touchend', cancelReset);
+resetBtn.addEventListener('touchcancel', cancelReset);
+
+function startHold(e) {
+    e.preventDefault(); // Prevent default behavior (like text selection)
     resetFill.style.transition = 'width 3s linear';
     resetFill.style.width = '100%';
     holdTimer = setTimeout(resetToHome, 3000);
-});
-
-resetBtn.addEventListener('mouseup', cancelReset);
-resetBtn.addEventListener('mouseleave', cancelReset);
+}
 
 function cancelReset() {
     clearTimeout(holdTimer);
@@ -180,3 +188,4 @@ function resetToHome() {
     resetFill.style.width = '0%';
     playerInputs.forEach(input => input.value = '');
 }
+
