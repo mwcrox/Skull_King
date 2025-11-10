@@ -141,6 +141,12 @@ function updateLeaderboard() {
         const info = document.createElement('span');
         info.className = 'leader-info';
         info.textContent = `${p.name} — ${p.score}`;
+        
+        if (p.score < 0) {
+            info.style.color = 'red';
+        } else {
+            info.style.color = 'white';
+        }
 
         li.appendChild(rank);
         li.appendChild(info);
